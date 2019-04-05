@@ -134,16 +134,16 @@ ENV_DIR=$3
 
 # fix STACK variable if unset
 if [[ -z "${STACK}" ]]; then
-  STACK="heroku-16"
+  STACK="heroku-18"
 fi
 
 # ensure correct stack
-if [[ ! "$STACK" == "heroku-16" ]]; then
+if [[ ! "$STACK" == "heroku-18" ]]; then
 
   echo
-  echo "-----> ERROR: This version of the buildpack is intended for use with the 'heroku-16' stack"
+  echo "-----> ERROR: This version of the buildpack is intended for use with the 'heroku-18' stack"
   echo
-  echo "       Use the 'heroku stack:set' CLI command to use the 'heroku-16' stack."
+  echo "       Use the 'heroku stack:set' CLI command to use the 'heroku-18' stack."
   echo "       See https://devcenter.heroku.com/articles/stack for more information."
   echo
   exit 1
@@ -155,7 +155,7 @@ if [[ -f "$BUILD_DIR/.r-version" ]]; then
   R_VERSION=$(read_var "$BUILD_DIR/.r-version")
   echo "NOTE: Using R version override [$R_VERSION]" | indent
 else
-  R_VERSION="3.4.4"
+  R_VERSION="3.5.3"
 fi
 
 # environment
@@ -177,7 +177,8 @@ BUILD_PACK_VERSION=${BUILD_PACK_VERSION:-latest}
 
 # build up path to binaries on S3
 R_BINARIES_FILE="R-${R_VERSION}-binaries-${BUILD_PACK_VERSION}.tar.gz"
-R_BINARIES="https://${S3_BUCKET}.s3.amazonaws.com/${STACK}/$R_BINARIES_FILE"
+#R_BINARIES="https://${S3_BUCKET}.s3.amazonaws.com/${STACK}/$R_BINARIES_FILE"
+R_BINARIES="https://storage.googleapis.com/dashr/$R_BINARIES_FILE"
 
 # vendor R into the slug
 topic "Vendoring R $R_VERSION for $STACK stack ($BUILD_PACK_VERSION)"
