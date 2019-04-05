@@ -6,7 +6,7 @@ if [ -f "$1/run.R" ]; then
 	# shiny app
 	cat <<EOF
 ---
-# R Shiny
+# DashR 
 default_process_types:
   console: fakechroot fakeroot chroot /app/.root /bin/bash
   web: fakechroot fakeroot chroot /app/.root /bin/sh -c 'cd /app && /usr/bin/R -f /app/run.R --gui-none --no-save'
