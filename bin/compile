@@ -138,6 +138,7 @@ if [[ -z "${STACK}" ]]; then
 fi
 
 # ensure correct stack
+echo "NOTE: Using [$STACK]" | indent
 if [[ ! "$STACK" == "heroku-18" ]]; then
 
   echo
