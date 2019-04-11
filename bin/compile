@@ -296,10 +296,12 @@ if [[ ! -z "$INIT_FILE" ]]; then
 
   # zap all the preinstalled packages -- RPK 2019-04-10
   echo "Listing all previously installed CRAN packages ..." | indent
-  ls -al $BUILD_DIR/.root/usr/local/lib/R/site-library/*
+  ls -al $BUILD_DIR/.root/usr/local/lib/R/site-library
   echo "Deleting all previously installed CRAN packages ..." | indent
   rm -rf $BUILD_DIR/.root/usr/local/lib/R/site-library/*
-  ls -al $BUILD_DIR/.root/usr/local/lib/R/site-library/*
+  echo "Listing all previously installed CRAN packages ..." | indent
+  ls -al $BUILD_DIR/.root/usr/local/lib/R/site-library
+  echo "Running the wrapper thing ..." | indent
 
   # execute the init wrapper
   # working directory must be /app so that provided packages/scripts can be found
