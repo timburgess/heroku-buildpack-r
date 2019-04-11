@@ -302,7 +302,8 @@ if [[ ! -z "$INIT_FILE" ]]; then
   # working directory must be /app so that provided packages/scripts can be found
   # fakechroot fakeroot chroot $CHROOT_DIR \
   #  /usr/bin/R --no-init-file --no-save --quiet --slave --file=/app/wrapper.R 2>&1 | indent
-  /usr/bin/R --slave < "$INIT_FILE" | indent
+  fakechroot fakeroot chroot $CHROOT_DIR \ 
+     /usr/bin/R --slave < "$INIT_FILE" | indent
 
   # determine whether the R script failed
   # if [[ -f "$CHROOT_DIR/app/status" ]]; then
