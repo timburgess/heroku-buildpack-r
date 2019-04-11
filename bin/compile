@@ -296,23 +296,26 @@ if [[ ! -z "$INIT_FILE" ]]; then
 
   # zap all the preinstalled packages -- RPK 2019-04-10
   echo "Deleting all previously installed CRAN packages ..." | indent
+  ls -larth $BUILD_DIR/.root/usr/local/lib/R/site-library/*
   rm -rf $BUILD_DIR/.root/usr/local/lib/R/site-library/*
+
+  cat $BUILD_DIR/wrapper.R
 
   # execute the init wrapper
   # working directory must be /app so that provided packages/scripts can be found
-  fakechroot fakeroot chroot $CHROOT_DIR \
-    /usr/bin/R --no-init-file --no-save --quiet --slave --file=/app/wrapper.R 2>&1 | indent
+  # fakechroot fakeroot chroot $CHROOT_DIR \
+  #  /usr/bin/R --no-init-file --no-save --quiet --slave --file=/app/wrapper.R 2>&1 | indent
 
   # determine whether the R script failed
-  if [[ -f "$CHROOT_DIR/app/status" ]]; then
-    echo "R $R_VERSION successfully installed (with init)" | indent
-  else
-    echo -e "\033[1;31mERROR: R $R_VERSION failed while executing \"init\". Check the log for details.\033[0m" | indent
-    exit 1
+  # if [[ -f "$CHROOT_DIR/app/status" ]]; then
+  #  echo "R $R_VERSION successfully installed (with init)" | indent
+  # else
+  #  echo -e "\033[1;31mERROR: R $R_VERSION failed while executing \"init\". Check the log for details.\033[0m" | indent
+  #  exit 1
   fi
 
   # clean up
-  rm "$CHROOT_DIR/app/status" "$WRAPPER"
+  # rm "$CHROOT_DIR/app/status" "$WRAPPER"
 
 else
 
