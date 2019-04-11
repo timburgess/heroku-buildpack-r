@@ -294,6 +294,10 @@ if [[ ! -z "$INIT_FILE" ]]; then
   #  replacements, so using a Ruby program, as Ruby is installed on Heroku by default
   ruby "$BUILDPACK_DIR/bin/util.rb" "$WRAPPER" "$INIT_FILE" "$BUILD_DIR" "$CRAN_MIRROR"
 
+  # zap all the preinstalled packages -- RPK 2019-04-10
+  echo "Deleting all previously installed CRAN packages ..." | indent
+  rm -rf $BUILD_DIR/.root/usr/local/lib/R/site-library/*
+
   # execute the init wrapper
   # working directory must be /app so that provided packages/scripts can be found
   fakechroot fakeroot chroot $CHROOT_DIR \
