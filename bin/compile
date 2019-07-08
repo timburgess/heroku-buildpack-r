@@ -133,11 +133,9 @@ CACHE_DIR=$2
 ENV_DIR=$3
 
 # fix STACK variable if unset
-# if [[ -z "${STACK}" ]]; then
-#  STACK="heroku-18"
-# fi
-
-STACK="heroku-18"
+if [[ -z "${STACK}" ]]; then
+  STACK="heroku-18"
+fi
 
 # ensure correct stack
 echo "NOTE: Using [$STACK]" | indent
