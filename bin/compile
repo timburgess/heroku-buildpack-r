@@ -133,9 +133,9 @@ CACHE_DIR=$2
 ENV_DIR=$3
 
 # fix STACK variable if unset
-if [[ -z "${STACK}" ]]; then
-  STACK="heroku-18"
-fi
+# if [[ -z "${STACK}" ]]; then
+STACK="heroku-18"
+#fi
 
 # ensure correct stack
 echo "NOTE: Using [$STACK]" | indent
@@ -156,7 +156,7 @@ if [[ -f "$BUILD_DIR/.r-version" ]]; then
   R_VERSION=$(read_var "$BUILD_DIR/.r-version")
   echo "NOTE: Using R version override [$R_VERSION]" | indent
 else
-  R_VERSION="3.5.3"
+  R_VERSION="3.6.1"
 fi
 
 # environment
@@ -203,7 +203,12 @@ else
   # fi
   # tar xzf "$CACHE_DIR/$R_BINARIES_FILE" -C .
 
-  curl $R_BINARIES -s -o - | tar xzf - -C .
+  # curl $R_BINARIES -s -o - | tar xzf - -C .
+  curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"
+  echo "R binaries downloaded; extracting ($R_BINARIES_FILE) ..."  | indent
+  tar -xf "$(basename ${R_BINARIES%.*})"
+  echo "($(basename ${R_BINARIES%.*})) successfully extracted." | indent
+  echo
 
 fi
 
@@ -235,9 +240,6 @@ sed -i "s#root:x:0:0:root:/root:/bin/bash#root:x:0:0:root:/app:/bin/bash#g" etc/
 
 fakechroot fakeroot chroot $CHROOT_DIR \
   /bin/sh -c 'cd /usr/lib && ln -sf ../lib/R/lib/libR.so libR.so'
-
-#
-###
 
 popd > /dev/null
 
