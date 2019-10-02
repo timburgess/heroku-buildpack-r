@@ -334,7 +334,13 @@ patch_chroot "$BUILD_DIR" "/app"
 topic "Caching build outputs"
 
 pushd $BUILD_DIR > /dev/null
-tar czf "$CACHE_DIR/$CACHE_KEY" .root .tools
+# TODO: have CPUs env var and use with pigz below
+#   eg. tar cf - paths-to-archive | pigz -9 -p 32 > archive.tar.gz
+if [ -x "$(command -v pigz)" ]; then
+  tar cf - .root .tools | pigz > "$CACHE_DIR/$CACHE_KEY"
+else
+  tar czf "$CACHE_DIR/$CACHE_KEY" .root .tools
+fi
 popd > /dev/null
 
 #
