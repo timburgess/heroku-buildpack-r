@@ -191,8 +191,8 @@ CACHE_KEY="$STACK-$R_VERSION-$BUILD_PACK_VERSION.tar.gz"
 if [[ -f "$CACHE_DIR/$CACHE_KEY" ]]; then
 
   echo "Retrieving R binaries from cache" | indent
-  if [ -x "$(command -v pigz)" ] && [ -x "$(command -v pv)" ]; then
-    pv "$CACHE_DIR/$CACHE_KEY" | tar -I pigz -xf - -C .
+  if [ -x "$(command -v pigz)" ]; then
+    tar -I pigz -xf "$CACHE_DIR/$CACHE_KEY" -C .
   else
     tar xzf "$CACHE_DIR/$CACHE_KEY" -C .
   fi
@@ -210,8 +210,8 @@ else
   # curl $R_BINARIES -s -o - | tar xzf - -C .
   # pigz -dc target.tar.gz | tar xf -
   # curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"  
-  if [ -x "$(command -v pigz)" ] && [ -x "$(command -v pv)" ]; then
-    curl --progress-bar $R_BINARIES | pv | pigz -dc - > "$(basename ${R_BINARIES%.*})"
+  if [ -x "$(command -v pigz)" ]; then
+    curl --progress-bar $R_BINARIES | pigz -dc - > "$(basename ${R_BINARIES%.*})"
   else
     curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"
   fi
@@ -347,8 +347,8 @@ topic "Caching build outputs"
 pushd $BUILD_DIR > /dev/null
 # TODO: have CPUs env var and use with pigz below
 #   eg. tar cf - paths-to-archive | pigz -9 -p 32 > archive.tar.gz
-if [ -x "$(command -v pigz)" ] && [ -x "$(command -v pv)" ]; then
-  tar cf - .root .tools | pv | pigz > "$CACHE_DIR/$CACHE_KEY"
+if [ -x "$(command -v pigz)" ]; then
+  tar cf - .root .tools | pigz > "$CACHE_DIR/$CACHE_KEY"
 else
   tar czf "$CACHE_DIR/$CACHE_KEY" .root .tools
 fi
