@@ -191,7 +191,11 @@ CACHE_KEY="$STACK-$R_VERSION-$BUILD_PACK_VERSION.tar.gz"
 if [[ -f "$CACHE_DIR/$CACHE_KEY" ]]; then
 
   echo "Retrieving R binaries from cache" | indent
-  tar xzf "$CACHE_DIR/$CACHE_KEY" -C .
+  if [ -x "$(command -v pigz)" ]; then
+    tar -I pigz -xf "$CACHE_DIR/$CACHE_KEY" -C .
+  else
+    tar xzf "$CACHE_DIR/$CACHE_KEY" -C .
+  fi
 
 else
 
@@ -204,10 +208,17 @@ else
   # tar xzf "$CACHE_DIR/$R_BINARIES_FILE" -C .
 
   # curl $R_BINARIES -s -o - | tar xzf - -C .
-  curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"
+  # pigz -dc target.tar.gz | tar xf -
+  # curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"  
+  if [ -x "$(command -v pigz)" ]; then
+    curl --progress-bar $R_BINARIES | pigz -dc - > "$(basename ${R_BINARIES%.*})"
+  else
+    curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"
+  fi
+
   echo "R binaries downloaded; extracting ($R_BINARIES_FILE) ..."  | indent
   tar -xf "$(basename ${R_BINARIES%.*})"
-  echo "($(basename ${R_BINARIES%.*})) successfully extracted." | indent
+  echo "$(basename ${R_BINARIES%.*}) successfully extracted." | indent
   echo
 
 fi
