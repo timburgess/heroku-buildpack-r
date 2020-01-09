@@ -179,7 +179,7 @@ BUILD_PACK_VERSION=${BUILD_PACK_VERSION:-latest}
 # build up path to binaries on S3
 R_BINARIES_FILE="R-${R_VERSION}-binaries-${BUILD_PACK_VERSION}.tar.gz"
 #R_BINARIES="https://${S3_BUCKET}.s3.amazonaws.com/${STACK}/$R_BINARIES_FILE"
-R_BINARIES="https://storage.googleapis.com/dashr/$R_BINARIES_FILE"
+R_BINARIES="https://storage.googleapis.com/dashr/${STACK}/$R_BINARIES_FILE"
 
 # vendor R into the slug
 topic "Vendoring R $R_VERSION for $STACK stack ($BUILD_PACK_VERSION)"
@@ -191,7 +191,11 @@ CACHE_KEY="$STACK-$R_VERSION-$BUILD_PACK_VERSION.tar.gz"
 if [[ -f "$CACHE_DIR/$CACHE_KEY" ]]; then
 
   echo "Retrieving R binaries from cache" | indent
-  tar xzf "$CACHE_DIR/$CACHE_KEY" -C .
+  if [ -x "$(command -v pigz)" ]; then
+    tar -I pigz -xf "$CACHE_DIR/$CACHE_KEY" -C .
+  else
+    tar xzf "$CACHE_DIR/$CACHE_KEY" -C .
+  fi
 
 else
 
@@ -204,10 +208,17 @@ else
   # tar xzf "$CACHE_DIR/$R_BINARIES_FILE" -C .
 
   # curl $R_BINARIES -s -o - | tar xzf - -C .
-  curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"
+  # pigz -dc target.tar.gz | tar xf -
+  # curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"  
+  if [ -x "$(command -v pigz)" ]; then
+    curl --progress-bar $R_BINARIES | pigz -dc - > "$(basename ${R_BINARIES%.*})"
+  else
+    curl --progress-bar $R_BINARIES | gunzip -f - > "$(basename ${R_BINARIES%.*})"
+  fi
+
   echo "R binaries downloaded; extracting ($R_BINARIES_FILE) ..."  | indent
   tar -xf "$(basename ${R_BINARIES%.*})"
-  echo "($(basename ${R_BINARIES%.*})) successfully extracted." | indent
+  echo "$(basename ${R_BINARIES%.*}) successfully extracted." | indent
   echo
 
 fi
@@ -334,7 +345,13 @@ patch_chroot "$BUILD_DIR" "/app"
 topic "Caching build outputs"
 
 pushd $BUILD_DIR > /dev/null
-tar czf "$CACHE_DIR/$CACHE_KEY" .root .tools
+# TODO: have CPUs env var and use with pigz below
+#   eg. tar cf - paths-to-archive | pigz -9 -p 32 > archive.tar.gz
+if [ -x "$(command -v pigz)" ]; then
+  tar cf - .root .tools | pigz > "$CACHE_DIR/$CACHE_KEY"
+else
+  tar czf "$CACHE_DIR/$CACHE_KEY" .root .tools
+fi
 popd > /dev/null
 
 #
