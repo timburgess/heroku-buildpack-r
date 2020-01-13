@@ -177,7 +177,7 @@ CRAN_MIRROR=${CRAN_MIRROR:-"https://cloud.r-project.org"}
 BUILD_PACK_VERSION=${BUILD_PACK_VERSION:-latest}
 
 # build up path to binaries on S3
-R_BINARIES_FILE="R-${R_VERSION}-binaries-${BUILD_PACK_VERSION}-rpk.tar.gz"
+R_BINARIES_FILE="R-${R_VERSION}-binaries-${BUILD_PACK_VERSION}.tar.gz"
 #R_BINARIES="https://${S3_BUCKET}.s3.amazonaws.com/${STACK}/$R_BINARIES_FILE"
 R_BINARIES="https://storage.googleapis.com/dashr/${STACK}/$R_BINARIES_FILE"
 
