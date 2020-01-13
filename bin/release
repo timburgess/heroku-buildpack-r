@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # bin/release <build-dir>
 
-if [ -f "$1/run.R" ]; then
+if [ -f $1/run.R ] || [ -f $1/app.R ] || [ -f $1/run.r ] || [ -f $1/app.r ]; then
 
-	# shiny app
+	# Dash for R app
 	cat <<EOF
 ---
-# DashR 
+# Dash for R 
 default_process_types:
   console: fakechroot fakeroot chroot /app/.root /bin/bash
   web: fakechroot fakeroot chroot /app/.root /bin/sh -c 'cd /app && /usr/bin/R -f /app/run.R --gui-none --no-save'
