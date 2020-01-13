@@ -255,16 +255,16 @@ fakechroot fakeroot chroot $CHROOT_DIR \
 popd > /dev/null
 
 # Aptfile?
-if [[ -f "$BUILD_DIR/Aptfile" ]]; then
+if [[ -f "$BUILD_DIR/apt-packages" ]]; then
 
-  topic "Installing binary dependencies from Aptfile"
+  topic "Installing binary dependencies from apt-packages"
 
   # TODO: add support for deb files
 
   PACKAGES=""
   while IFS='' read -r PACKAGE || [[ -n "$PACKAGE" ]]; do
     PACKAGES="$PACKAGES $PACKAGE"
-  done < "$BUILD_DIR/Aptfile"
+  done < "$BUILD_DIR/apt-packages"
 
   fakechroot fakeroot chroot $CHROOT_DIR \
     apt-get update > /dev/null
