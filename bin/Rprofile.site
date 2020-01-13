@@ -4,8 +4,14 @@
 # print("Fixing normalizePath for symlinked /app")
 
 # HACK normalizePath method, so that it works for /app symlink
-Sys.setenv(DASH_PORT="5000")
-Sys.setenv(DASH_HOST="0.0.0.0")
+if (Sys.getenv("DASH_PORT") == "") {
+  Sys.setenv(DASH_PORT="5000")
+}
+
+if (Sys.getenv("DASH_HOST") == "") {
+  Sys.setenv(DASH_HOST="0.0.0.0")
+}
+
 oldnormalizePath <- base::normalizePath
 newnormalizePath <- function(path, winslash="\\", mustWork=NA) {
   # override mustWork to FALSE
