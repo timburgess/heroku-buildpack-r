@@ -6,10 +6,6 @@ r <- getOption("repos")
 r["CRAN"] <- "CRAN_MIRROR"
 options(repos=r)
 
-# check if /app directory exists and set it as working directory if so
-if (dir.exists("/app"))
-  setwd("/app")
-
 # ======================================================================
 
 INIT_FILE_CONTENT
