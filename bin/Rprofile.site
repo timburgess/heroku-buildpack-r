@@ -1,7 +1,9 @@
 # see https://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html
 # and https://stat.ethz.ch/R-manual/R-devel/library/base/html/eval.html
 
-# print("Fixing normalizePath for symlinked /app")
+# check if /app directory exists and set it as working directory if so
+if (dir.exists("/app"))
+  setwd("/app")
 
 # Set environment variables if unset
 if (Sys.getenv("PORT") == "") {
