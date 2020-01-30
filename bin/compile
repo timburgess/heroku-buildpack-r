@@ -314,7 +314,7 @@ if [[ ! -z "$INIT_FILE" ]]; then
   # fakechroot fakeroot chroot $CHROOT_DIR \
   #  /usr/bin/R --no-init-file --no-save --quiet --slave --file=/app/wrapper.R 2>&1 | indent
   fakechroot fakeroot chroot $CHROOT_DIR \
-    /usr/bin/Rscript -e 'cat("\nCurrent working directory (within Rscript) is", getwd()); system2("ls", "-larth"); dir(); setwd("/app"); getwd(); dir(); source("/app/init.R")' 2>&1 | indent
+    /usr/bin/Rscript -e 'cat("\nCurrent working directory (within Rscript) is", getwd()); list.files("/tmp/build", recursive=TRUE); setwd("/tmp/build/app"); source("/app/init.R")' 2>&1 | indent
 
   # determine whether the R script failed
   if [[ -f "$CHROOT_DIR/app/status" ]]; then
