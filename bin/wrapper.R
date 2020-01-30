@@ -6,6 +6,10 @@ r <- getOption("repos")
 r["CRAN"] <- "CRAN_MIRROR"
 options(repos=r)
 
+dir(".")
+dir("./app")
+setwd("./app")
+
 # ======================================================================
 
 INIT_FILE_CONTENT
