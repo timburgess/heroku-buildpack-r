@@ -6,7 +6,6 @@ r <- getOption("repos")
 r["CRAN"] <- "CRAN_MIRROR"
 options(repos=r)
 
-setwd("./app")
 cat("Current working directory (within wrapper.R) is", getwd())
 
 # ======================================================================
