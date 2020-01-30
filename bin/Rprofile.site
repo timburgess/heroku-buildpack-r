@@ -2,8 +2,8 @@
 # and https://stat.ethz.ch/R-manual/R-devel/library/base/html/eval.html
 
 # check if /app directory exists and set it as working directory if so
-if (dir.exists("/app"))
-  setwd("/app")
+if (dir.exists("/tmp/app"))
+  setwd("/tmp/app")
 
 # Set environment variables if unset
 if (Sys.getenv("PORT") == "") {
