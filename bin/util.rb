@@ -10,7 +10,7 @@ init_file_content = "\n\n" + File.read(init_file) + "\n\n"
 
 # insert placeholders, APP_DIR, CRAN_MIRROR and INIT_FILE_CONTENT
 
-wrapper_file_content.gsub!(/SETWD_CMD/, 'setwd(' + app_dir + ')')
+wrapper_file_content.gsub!(/SETWD_CMD/, 'setwd("' + app_dir + '")')
 wrapper_file_content.gsub!(/APP_DIR/, app_dir)
 wrapper_file_content.gsub!(/CRAN_MIRROR/, cran_mirror)
 wrapper_file_content.gsub!(/INIT_FILE_CONTENT/, init_file_content)
