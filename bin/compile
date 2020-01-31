@@ -310,7 +310,7 @@ if [[ ! -z "$INIT_FILE" ]]; then
   ruby "$BUILDPACK_DIR/bin/util.rb" "$WRAPPER" "$INIT_FILE" "$BUILD_DIR" "$CRAN_MIRROR"
 
   fakechroot fakeroot chroot $CHROOT_DIR \
-    cat /app/wrapper.R | indent
+    cat /app/wrapper.R 2>&1 | indent
 
   # execute the init wrapper
   # working directory must be /app so that provided packages/scripts can be found
