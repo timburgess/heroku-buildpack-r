@@ -15,7 +15,7 @@ wrapper_file_content.gsub!(/APP_DIR/, app_dir)
 wrapper_file_content.gsub!(/CRAN_MIRROR/, cran_mirror)
 wrapper_file_content.gsub!(/INIT_FILE_CONTENT/, init_file_content)
 
-File.open(init_file, 'w') do |f|
+File.open(wrapper_file, 'w') do |f|
 	f.write(wrapper_file_content)
 end
 
