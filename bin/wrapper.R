@@ -7,7 +7,7 @@ r["CRAN"] <- "CRAN_MIRROR"
 options(repos=r)
 
 cat("Current working directory before setwd (within wrapper.R) is", getwd(), "\n")
-system("ls -lah SETWD_VAR")
+system("ls -larth SETWD_VAR")
 setwd("SETWD_VAR")
 cat("Current working directory (within wrapper.R) is", getwd(), "\n")
 
