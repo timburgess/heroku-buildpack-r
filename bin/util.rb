@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-RELATIVE_PACKAGE_RE = /install\.packages\((?:\s*)\"(?!\/)(?!http:|https:)(?<package>.+)"(?:.*)repos(?:\s*)=(?:\s*)NULL/
+RELATIVE_PACKAGE_RE = /install\.packages(?:\s*)\((?:\s*)[\"'](?!\/)(?!http:|https:)(?<package>.+)[\"'](?<ending>(?:.*)repos(?:\s*)=(?:\s*)NULL)/
 
 wrapper_file = ARGV[0]
 init_file = ARGV[1]
@@ -11,7 +11,7 @@ wrapper_file_content = File.read(wrapper_file)
 
 init_lines = []
 File.readlines(init_file).each do |line|
-  init_lines << line.gsub(RELATIVE_PACKAGE_RE, 'install.packages("/app/\k<package>"').rstrip
+  init_lines << line.gsub(RELATIVE_PACKAGE_RE, 'install.packages("/app/\k<package>"\k<ending>').rstrip
 end
 
 init_file_content = "\n\n" + init_lines.join("\n") + "\n\n"
