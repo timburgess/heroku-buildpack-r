@@ -1,0 +1,23 @@
+# see https://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html
+# and https://stat.ethz.ch/R-manual/R-devel/library/base/html/eval.html
+
+# print("Fixing normalizePath for symlinked /app")
+
+# Set environment variables if unset
+if (Sys.getenv("PORT") == "") {
+  Sys.setenv(PORT="5000")
+}
+
+if (Sys.getenv("HOST") == "") {
+  Sys.setenv(HOST="0.0.0.0")
+}
+
+# HACK normalizePath method, so that it works for /app symlink
+oldnormalizePath <- base::normalizePath
+newnormalizePath <- function(path, winslash="\\", mustWork=NA) {
+  # override mustWork to FALSE
+  return(oldnormalizePath(path, winslash, mustWork=FALSE))
+}
+utils::assignInNamespace(x="normalizePath", value=newnormalizePath, ns="base")
+
+setwd("app/")

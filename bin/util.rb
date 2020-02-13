@@ -1,12 +1,20 @@
 #!/usr/bin/env ruby
 
+RELATIVE_PACKAGE_RE = /install\.packages\((?:\s*)\"(?!\/)(?!http:|https:)(?<package>.+)"(?:.*)repos(?:\s*)=(?:\s*)NULL/
+
 wrapper_file = ARGV[0]
 init_file = ARGV[1]
 app_dir = ARGV[2]
 cran_mirror = ARGV[3]
 
 wrapper_file_content = File.read(wrapper_file)
-init_file_content = "\n\n" + File.read(init_file) + "\n\n"
+
+init_lines = []
+File.readlines(init_file).each do |line|
+  init_lines << line.gsub(RELATIVE_PACKAGE_RE, 'install.packages("/app/\k<package>"').rstrip
+end
+
+init_file_content = "\n\n" + init_lines.join("\n") + "\n\n"
 
 # insert placeholders, APP_DIR, CRAN_MIRROR and INIT_FILE_CONTENT
 

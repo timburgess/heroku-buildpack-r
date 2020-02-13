@@ -331,6 +331,8 @@ else
 
 fi
 
+cp "$BUILDPACK_DIR/bin/environ/Rprofile.site" "$CHROOT_DIR/etc/R/Rprofile.site"
+
 # fix up /app symlink for runtime location
 pushd $CHROOT_DIR > /dev/null
 rm app
