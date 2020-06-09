@@ -68,10 +68,10 @@
 #
 
 # fail fast
-set -e
+# set -e
 
 # debug
-# set -x
+set -x
 
 shopt -s extglob
 
