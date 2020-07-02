@@ -20,4 +20,4 @@ newnormalizePath <- function(path, winslash="\\", mustWork=NA) {
 }
 utils::assignInNamespace(x="normalizePath", value=newnormalizePath, ns="base")
 
-setwd("app/")
+setwd("/app")
