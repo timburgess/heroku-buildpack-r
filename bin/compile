@@ -27,11 +27,11 @@ R_BINARIES="http://storage.googleapis.com/dashr/heroku-18/R-${R_VERSION}-nochroo
 GCC_VERSION=7.5.0
 START_TIME="$(date -u +%s)"
 
-echo -n "-----> Fetching R $R_VERSION tarball...." | indent
+echo -n "-----> Fetching R $R_VERSION tarball...."
 echo
 curl --progress-bar $R_BINARIES | xz --decompress - > "$(basename ${R_BINARIES%.*})"
 
-echo -n "-----> Unpacking R $R_VERSION tarball...." | indent
+echo -n "-----> Unpacking R $R_VERSION tarball...."
 echo
 tar -xf "$(basename ${R_BINARIES%.*})" -C $BUILD_DIR && rm -rf "$(basename ${R_BINARIES%.*})"
 
@@ -49,7 +49,7 @@ BUILD_DIR=$APP_DIR
 export BUILD_DIR CACHE_DIR ENV_DIR	
 export PATH="$BUILD_DIR/.heroku/r/usr/bin/R/bin:$BUILD_DIR/.heroku/r/usr/bin:$BUILD_DIR/.heroku/r/usr/local/bin:$PATH"	
 export LD_LIBRARY_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib"	
-export PKG_CONFIG_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig"	
+export PKG_CONFIG_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig"	
 export CXX=g++	
 export CXX11=g++	
 export CC=gcc	
@@ -68,6 +68,33 @@ mkdir -p $CACHE_DIR
 for dir in $CACHED_DIRS; do
   cp -R $CACHE_DIR/$dir . &> /dev/null || true
 done
+
+if [[ -f "$BUILD_DIR/Aptfile" ]]; then
+  APTPATH = "$BUILD_DIR/Aptfile"
+elif [[ -f "$BUILD_DIR/apt-packages" ]]; then
+  APTPATH = "$BUILD_DIR/apt-packages" 
+else
+  APTPATH = ""
+fi
+
+if [[ $APTPATH != "" ]]; then
+  topic "Installing binary dependencies from apt-packages or Aptfile"
+
+  PACKAGES=""
+  while IFS='' read -r PACKAGE || [[ -n "$PACKAGE" ]]; do
+    PACKAGES="$PACKAGES $PACKAGE"
+  done < "$APTPATH"
+
+  apt-get update > /dev/null
+
+  apt-get install -y $PACKAGES 2>&1
+
+  apt-get clean > /dev/null
+
+  # remove unneeded files
+  rm -rf /var/lib/apt/lists/* > /dev/null
+
+fi
 
 # get the init.r file to use
 # it can be init.[rR] or run.R
@@ -117,7 +144,7 @@ fi
 cd $BUILD_DIR
 mkdir -p $BUILD_DIR/.profile.d
 echo 'export PATH="$PATH:$HOME/.heroku/r/usr/bin/R/bin:$HOME/.heroku/r/usr/bin/R/bin"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
-echo 'export PKG_CONFIG_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export PKG_CONFIG_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export LD_LIBRARY_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export LIBRARY_PATH="$HOME/.heroku/r/usr/lib:/app/.heroku/r/usr/lib/x86_64-linux-gnu"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CC=gcc' >> "${BUILD_DIR}/.profile.d/setvars.sh"
