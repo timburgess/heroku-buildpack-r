@@ -78,7 +78,8 @@ else
 fi
 
 if [[ $APTPATH != "" ]]; then
-  topic "Installing binary dependencies from apt-packages or Aptfile"
+  echo -n "Installing binary dependencies from apt-packages or Aptfile"
+  echo
 
   PACKAGES=""
   while IFS='' read -r PACKAGE || [[ -n "$PACKAGE" ]]; do
