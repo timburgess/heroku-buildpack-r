@@ -86,11 +86,11 @@ if [[ $APTPATH != "" ]]; then
     PACKAGES="$PACKAGES $PACKAGE"
   done < "$APTPATH"
 
-  apt-get update > /dev/null
+  sudo apt-get update > /dev/null
 
-  apt-get install -y $PACKAGES 2>&1
+  sudo apt-get install -y $PACKAGES 2>&1
 
-  apt-get clean > /dev/null
+  sudo apt-get clean > /dev/null
 
 fi
 
