@@ -70,11 +70,11 @@ for dir in $CACHED_DIRS; do
 done
 
 if [[ -f "$BUILD_DIR/Aptfile" ]]; then
-  APTPATH = "$BUILD_DIR/Aptfile"
+  APTPATH="$BUILD_DIR/Aptfile"
 elif [[ -f "$BUILD_DIR/apt-packages" ]]; then
-  APTPATH = "$BUILD_DIR/apt-packages" 
+  APTPATH="$BUILD_DIR/apt-packages" 
 else
-  APTPATH = ""
+  APTPATH=""
 fi
 
 if [[ $APTPATH != "" ]]; then
