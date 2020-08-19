@@ -1,122 +1,145 @@
 #!/usr/bin/env bash
-# bin/compile <build-dir> <cache-dir>
+# bin/compile <build-dir> <cache-dir> <env-path>
 
 # fail fast
-set -e
+set -eo pipefail
 
-# debug
-# set -x
-
-shopt -s extglob
-
-function error() {
-  echo " !     $*" >&2
-  exit 1
-}
-
-function indent() {
-  c='s/^/       /'
-  case $(uname) in
-    Darwin) sed -l "$c";;
-    *)      sed -u "$c";;
-  esac
-}
-
-function read_var() {
-  echo $(head -n 1 $1)
-}
-
-# clean up leaking environment
-unset GIT_DIR
-
-# parse and derive params
+# parse args
+BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
+BUILDPACK_DIR=$(cd $(dirname $0); cd ..; pwd)
 BUILD_DIR=$1
-CACHE_DIR="$2/vendor"
-LP_DIR=`cd $(dirname $0); cd ..; pwd`
-BUILDPACK_DIR="$(dirname $(dirname $0))"
+CACHE_DIR=$2
+ENV_DIR=$3
 
-# config
+source $BIN_DIR/utils
 
-# read in R version if file exists
-if [[ -f $BUILD_DIR/.r-version ]]; then
-  R_VERSION=`read_var $BUILD_DIR/.r-version`
-else
-  R_VERSION="3.1.2"
-fi
+APP_DIR="/app"
+TMP_APP_DIR=$CACHE_DIR/tmp_app_dir
+CACHED_DIRS=".heroku"
 
-# read in buildback binary version if file exists
-if [[ -f $BUILD_DIR/.r-buildpack-version ]]; then
-  BUILD_PACK_VERSION=`read_var $BUILD_DIR/.r-buildpack-version`
-else
-  BUILD_PACK_VERSION="20150301-1046"
-fi
+# declare variables
+DEFAULT_R_VERSION=4.0.1
+R_VERSION="$DEFAULT_R_VERSION"
+R_MAJOR_VERSION="${R_VERSION%%.*}"
+CRAN_MIRROR=${CRAN_MIRROR:-"https://cloud.r-project.org"}
+R_BINARIES="http://storage.googleapis.com/dashr/heroku-18/R-${R_VERSION}-nochroot.tar.xz"
+#GCC_VERSION="$(gcc --version | grep ^gcc | sed 's/^.* //g')"
+GCC_VERSION=7.5.0
+START_TIME="$(date -u +%s)"
 
-S3_BUCKET="heroku-buildpack-r"
-R_BINARIES="http://${S3_BUCKET}.s3.amazonaws.com/R-${R_VERSION}-binaries-${BUILD_PACK_VERSION}.tar.gz"
+echo -n "-----> Fetching R $R_VERSION tarball...." | indent
+echo
+curl --progress-bar $R_BINARIES | xz --decompress - > "$(basename ${R_BINARIES%.*})"
 
-VENDOR_DIR="$BUILD_DIR/vendor"
-R_BASE="$VENDOR_DIR/R"
-CRAN_MIRROR="http://cran.revolutionanalytics.com"
+echo -n "-----> Unpacking R $R_VERSION tarball...." | indent
+echo
+tar -xf "$(basename ${R_BINARIES%.*})" -C $BUILD_DIR && rm -rf "$(basename ${R_BINARIES%.*})"
+
+mkdir -p $TMP_APP_DIR
+deep-mv $APP_DIR $TMP_APP_DIR
+
+# Copy Application code in.
+deep-mv $BUILD_DIR $APP_DIR
+
+# Set new context.
+ORIG_BUILD_DIR=$BUILD_DIR
+BUILD_DIR=$APP_DIR
+
+# export environment variables	
+export BUILD_DIR CACHE_DIR ENV_DIR	
+export PATH="$BUILD_DIR/.heroku/r/usr/bin/R/bin:$BUILD_DIR/.heroku/r/usr/bin:$BUILD_DIR/.heroku/r/usr/local/bin:$PATH"	
+export LD_LIBRARY_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib"	
+export PKG_CONFIG_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig"	
+export CXX=g++	
+export CXX11=g++	
+export CC=gcc	
+export FC=gfortran	
+export F77=gfortran	
+
+#export LDFLAGS="L/app/.heroku/r/usr/lib/x86_64-linux-gnu/libgfortran -lgfortran"	
+export LIBRARY_PATH="$BUILD_DIR/.heroku/r/usr/lib:/app/.heroku/r/usr/lib/x86_64-linux-gnu"
+
+# Switch to the repo's context.
+cd $BUILD_DIR
 
 mkdir -p $CACHE_DIR
 
-# vendor R into the slug
-echo "Vendoring R $R_VERSION ($BUILD_PACK_VERSION)" | indent
+# Restore old artifacts from the cache.
+for dir in $CACHED_DIRS; do
+  cp -R $CACHE_DIR/$dir . &> /dev/null || true
+done
 
-# download and unpack binaries
-echo "Downloading and unpacking R binaries" | indent
-mkdir -p $VENDOR_DIR && curl $R_BINARIES -s -o - | tar xzf - -C $VENDOR_DIR
+# get the init.r file to use
+# it can be init.[rR] or run.R
+if [[ -f "$BUILD_DIR/init.r" ]]; then
+  INIT_FILE="$BUILD_DIR/init.r"
+elif [[ -f "$BUILD_DIR/init.R" ]]; then
+  INIT_FILE="$BUILD_DIR/init.R"
+else
+  # assuming run.R is present
+  unset INIT_FILE
+fi
 
-# need to copy the binaries to /app/vendor so that R works
-mkdir -p /app/vendor/gcc
-cp -R $VENDOR_DIR/gcc/* /app/vendor/gcc
+if [[ ! -z "$INIT_FILE" ]]; then
 
-mkdir -p /app/vendor/glibc
-cp -R $VENDOR_DIR/glibc/* /app/vendor/glibc
+  # prepare wrapper script
+  WRAPPER="$BUILD_DIR/wrapper.R"
+  cp "$BUILDPACK_DIR/bin/wrapper.R" $WRAPPER
 
-mkdir -p /app/vendor/gsl
-cp -R $VENDOR_DIR/gsl/* /app/vendor/gsl
+  # perform insertions
+  #  would have preferred to use sed or awk for this, but it's real tricky with multi-line
+  #  replacements, so using a Ruby program, as Ruby is installed on Heroku by default
+  ruby "$BUILDPACK_DIR/bin/util.rb" "$WRAPPER" "$INIT_FILE" "$BUILD_DIR" "$CRAN_MIRROR"
 
-mkdir -p /app/vendor/R
-cp -R $VENDOR_DIR/R/* /app/vendor/R
+  env
+  
+  # execute the init.R 
+  # working directory must be /app so that provided packages/scripts can be found
+  $BUILD_DIR/.heroku/r/usr/bin/R/bin/R --no-init-file --no-save --quiet --slave --file=$WRAPPER 2>&1 | indent
 
-# HACK: need to copy over the gcc libs so that packages can find them
-mkdir -p /app/vendor/R/lib64/R/lib
-cp /app/vendor/gcc/lib64/* /app/vendor/R/lib64/R/lib
+  # determine whether the R script failed
+  if [[ -f "$BUILD_DIR/status" ]]; then
+    echo "R $R_VERSION successfully installed (with init)" | indent
+  else
+    echo -e "\033[1;31mERROR: R $R_VERSION failed while executing \"init\". Check the log for details.\033[0m" | indent
+    exit 1
+  fi
 
-# R needs to know where gfortran and glibc header files are
-export PATH="/app/vendor/R/bin:/app/vendor/gcc/bin:$PATH"
+  # clean up
+  rm "$BUILD_DIR/status" "$WRAPPER"
 
-export LDFLAGS="-L/app/vendor/gcc/lib64 -L/app/vendor/gsl/lib"
-export CPPFLAGS="-I/app/vendor/glibc/string -I/app/vendor/glibc/time -I/app/vendor/gsl/include"
-export PKG_LDFLAGS=$LDFLAGS
-export PKG_CPPFLAGS=$CPPFLAGS
+else
 
-export R_HOME=$R_BASE/lib64/R
-export R_INCLUDE=$R_HOME/include
+  echo "R $R_VERSION successfully installed" | indent
 
-# copy over environment
+fi
+
+cd $BUILD_DIR
 mkdir -p $BUILD_DIR/.profile.d
-cp "$BUILDPACK_DIR/bin/r_environment.sh" $BUILD_DIR/.profile.d/r_environment.sh
+echo 'export PATH="$PATH:$HOME/.heroku/r/usr/bin/R/bin:$HOME/.heroku/r/usr/bin/R/bin"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export PKG_CONFIG_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export LD_LIBRARY_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export LIBRARY_PATH="$HOME/.heroku/r/usr/lib:/app/.heroku/r/usr/lib/x86_64-linux-gnu"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export CC=gcc' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export CXX=g++' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export CXX11=g++' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export FC=gfortran' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export LDFLAGS="-lgfortran"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 
-# prevent warnings when building packages
-mkdir -p /app/vendor/R/lib64/R/doc/html
-touch /app/vendor/R/lib64/R/doc/html/R.css
+# Store new artifacts in cache.
+for dir in $CACHED_DIRS; do
+  rm -rf $CACHE_DIR/$dir
+  cp -R $dir $CACHE_DIR/
+done
 
-# install dependencies from CRAN
-echo "Executing init.r script" | indent
+# Copy Application code in.
+deep-mv $BUILD_DIR $ORIG_BUILD_DIR
+deep-mv $TMP_APP_DIR $APP_DIR
 
-# set the CRAN mirror and run the init.r program
-/app/vendor/R/bin/R -s <<RPROG > indent
-  Sys.setenv(BUILD_DIR="$BUILD_DIR")
-  setwd("$BUILD_DIR")
-  r <- getOption("repos");
-  r["CRAN"] <- "$CRAN_MIRROR";
-  options(repos=r);
-  `cat $BUILD_DIR/init.r`
-RPROG
+echo "-----> Done" | indent
+echo
 
-echo "R $R_VERSION successfully installed" | indent
-
-# need to copy binaries back so that any installed packages are included in the slug
-cp -R /app/vendor/R/* $VENDOR_DIR/R
+# debug
+END_TIME="$(date -u +%s)"
+ELAPSED="$(($END_TIME-$START_TIME))"
+echo "Build took $ELAPSED seconds to complete" | indent

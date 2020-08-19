@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # bin/detect <build-dir>
 
-if [ -f $1/init.r ]; then
-  echo "R" && exit 0
+# look for init.r / init.R / run.r / run.R / app.r / app.R
+if [ -f $1/run.R ] || [ -f $1/app.R ] || [ -f $1/run.r ] || [ -f $1/app.r ]; then
+  echo "Dash for R" && exit 0
+elif [ -f $1/init.r ] || [ -f $1/init.R ]; then
+  echo "R Console" && exit 0
 else
   echo "no" && exit 1
 fi

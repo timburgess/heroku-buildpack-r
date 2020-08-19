@@ -1,6 +1,50 @@
 #!/usr/bin/env bash
 # bin/release <build-dir>
 
-cat <<EOF
---- {}
+if [ -f "$1/run.R" ]; then
+        # Dash for R app
+        cat <<EOF
+---
+# Dash for R 
+default_process_types:
+  web: R -f /app/run.R --gui-none --no-save
 EOF
+
+elif [ -f "$1/run.r" ]; then
+        # Dash for R app
+        cat <<EOF
+---
+# Dash for R 
+default_process_types:
+  web: R -f /app/run.r --gui-none --no-save
+EOF
+
+elif [ -f "$1/app.R" ]; then
+        # Dash for R app
+        cat <<EOF
+---
+# Dash for R 
+default_process_types:
+  web: R -f /app/app.R --gui-none --no-save
+EOF
+
+elif [ -f "$1/app.r" ]; then
+        # Dash for R app
+        cat <<EOF
+---
+# Dash for R 
+default_process_types:
+  web: R -f /app/run.r --gui-none --no-save
+EOF
+
+else
+
+	# console app
+	cat <<EOF
+---
+# R Console
+default_process_types:
+  console: /bin/bash
+EOF
+
+fi
