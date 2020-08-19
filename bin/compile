@@ -92,9 +92,6 @@ if [[ $APTPATH != "" ]]; then
 
   apt-get clean > /dev/null
 
-  # remove unneeded files
-  rm -rf /var/lib/apt/lists/* > /dev/null
-
 fi
 
 # get the init.r file to use
