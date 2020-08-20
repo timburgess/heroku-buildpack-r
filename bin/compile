@@ -48,7 +48,7 @@ BUILD_DIR=$APP_DIR
 # export environment variables	
 export BUILD_DIR CACHE_DIR ENV_DIR	
 export PATH="$BUILD_DIR/.heroku/r/usr/bin/R/bin:$BUILD_DIR/.heroku/r/usr/bin:$BUILD_DIR/.heroku/r/usr/local/bin:$PATH"	
-export LD_LIBRARY_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib"	
+export LD_LIBRARY_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.heroku/r/usr/lib:/lib"
 export PKG_CONFIG_PATH="$BUILD_DIR/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig"	
 export CXX=g++	
 export CXX11=g++	
@@ -57,7 +57,7 @@ export FC=gfortran
 export F77=gfortran	
 
 #export LDFLAGS="L/app/.heroku/r/usr/lib/x86_64-linux-gnu/libgfortran -lgfortran"	
-export LIBRARY_PATH="$BUILD_DIR/.heroku/r/usr/lib:/app/.heroku/r/usr/lib/x86_64-linux-gnu"
+export LIBRARY_PATH="$BUILD_DIR/.heroku/r/usr/lib:/app/.heroku/r/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.heroku/r/usr/lib"
 
 # Switch to the repo's context.
 cd $BUILD_DIR
