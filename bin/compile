@@ -77,23 +77,6 @@ else
   APTPATH=""
 fi
 
-if [[ $APTPATH != "" ]]; then
-  echo -n "Installing binary dependencies from apt-packages or Aptfile"
-  echo
-
-  PACKAGES=""
-  while IFS='' read -r PACKAGE || [[ -n "$PACKAGE" ]]; do
-    PACKAGES="$PACKAGES $PACKAGE"
-  done < "$APTPATH"
-
-  sudo apt-get update > /dev/null
-
-  sudo apt-get install -y $PACKAGES 2>&1
-
-  sudo apt-get clean > /dev/null
-
-fi
-
 # get the init.r file to use
 # it can be init.[rR] or run.R
 if [[ -f "$BUILD_DIR/init.r" ]]; then
