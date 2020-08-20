@@ -126,7 +126,7 @@ cd $BUILD_DIR
 mkdir -p $BUILD_DIR/.profile.d
 echo 'export PATH="$PATH:$HOME/.heroku/r/usr/bin/R/bin:$HOME/.heroku/r/usr/bin/R/bin"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export PKG_CONFIG_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
-echo 'export LD_LIBRARY_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.heroku/r/usr/lib:/lib"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export LD_LIBRARY_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$HOME/.heroku/r/usr/lib:/lib"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export LIBRARY_PATH="$HOME/.heroku/r/usr/lib:/app/.heroku/r/usr/lib/x86_64-linux-gnu"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CC=gcc' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CXX=g++' >> "${BUILD_DIR}/.profile.d/setvars.sh"
