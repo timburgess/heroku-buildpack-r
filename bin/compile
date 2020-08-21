@@ -132,7 +132,7 @@ echo 'export CC=gcc' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CXX=g++' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CXX11=g++' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export FC=gfortran' >> "${BUILD_DIR}/.profile.d/setvars.sh"
-echo 'export LDFLAGS="-lgfortran"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+echo 'export LDFLAGS="-L/app/.heroku/r/usr/lib/x86_64-linux-gnu -L/app/.heroku/r/usr/lib -lgfortran"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 
 # Store new artifacts in cache.
 for dir in $CACHED_DIRS; do
