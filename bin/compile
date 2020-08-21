@@ -69,14 +69,6 @@ for dir in $CACHED_DIRS; do
   cp -R $CACHE_DIR/$dir . &> /dev/null || true
 done
 
-if [[ -f "$BUILD_DIR/Aptfile" ]]; then
-  APTPATH="$BUILD_DIR/Aptfile"
-elif [[ -f "$BUILD_DIR/apt-packages" ]]; then
-  APTPATH="$BUILD_DIR/apt-packages" 
-else
-  APTPATH=""
-fi
-
 # get the init.r file to use
 # it can be init.[rR] or run.R
 if [[ -f "$BUILD_DIR/init.r" ]]; then
@@ -128,7 +120,7 @@ echo 'export PATH="$PATH:$HOME/.heroku/r/usr/bin:$HOME/.heroku/r/usr/bin/R/bin:$
 echo 'export PKG_CONFIG_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export LD_LIBRARY_PATH="$HOME/.heroku/r/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$HOME/.heroku/r/usr/lib:/lib"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export LIBRARY_PATH="$HOME/.heroku/r/usr/lib:$HOME/.heroku/r/usr/lib/x86_64-linux-gnu"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
-echo 'export ACLOCAL_PATH="/app/.heroku/r/usr/share/aclocal"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
+#echo 'export ACLOCAL_PATH="/app/.heroku/r/usr/share/aclocal"' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CC=gcc' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CXX=g++' >> "${BUILD_DIR}/.profile.d/setvars.sh"
 echo 'export CXX11=g++' >> "${BUILD_DIR}/.profile.d/setvars.sh"
