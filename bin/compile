@@ -124,6 +124,7 @@ function patch_chroot() {
 }
 
 echo "Starting script"
+uname -all | indent
 
 # debug
 START_TIME="$(date -u +%s)"
