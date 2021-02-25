@@ -123,6 +123,8 @@ function patch_chroot() {
   sed -i "s#$old#$new#g" "$BUILD_DIR/.tools/fakechroot/lib/fakechroot/libfakechroot.la"
 }
 
+echo "Starting script"
+
 # debug
 START_TIME="$(date -u +%s)"
 
